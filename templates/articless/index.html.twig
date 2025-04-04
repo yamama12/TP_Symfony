@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Articles{% endblock %}
+
+{% block body %}
+    {% if articless %}
+        <table id="articles" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prix</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articless %}
+                    <tr>
+                        <td>{{ article.nom }}</td>
+                        <td>{{ article.prix }}</td>
+                        <td>
+                            <a href="{{ path('articless_show', {'id': article.id}) }}" class="btn btn-dark">Détails</a>
+                            <a href="{{ path('edit_articless', {'id': article.id}) }}" class="btn btn-dark">Modifier</a>
+       <form action="{{ path('delete_articless', {'id': article.id}) }}" method="post" class="d-inline">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr ?')">
+        <i class="fas fa-trash-alt"></i> Supprimer
+    </button>
+</form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aucun article</p>
+    {% endif %}
+{% endblock %}
