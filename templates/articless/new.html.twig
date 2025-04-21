@@ -1,14 +1,8 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Nouvel Article{% endblock %}
-
+{% block title %}Ajouter Article{% endblock %}
 {% block body %}
- 
-
-    {{ form_start(form) }}
-        {{ form_row(form.nom) }}
-        {{ form_row(form.prix) }}
-        
-        <!-- Le bouton de soumission est déjà inclus dans le formulaire, donc pas besoin de le rajouter ici -->
-    {{ form_end(form) }}
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+{{ form_widget(form) }}
+<button type="submit" class="btn btn-success">Créer</button>
+{{ form_end(form) }}
 {% endblock %}

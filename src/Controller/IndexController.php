@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\GreaterThan;
+use App\Form\ArticleType;
 
 class IndexController extends AbstractController
 {
@@ -51,43 +52,22 @@ class IndexController extends AbstractController
         return $this->redirectToRoute('articless_list');
     }
 
-    /**
-     * @Route("/articless/new", name="new_articless", methods={"GET", "POST"})
-     */
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $articless = new Articles();
-        
-        $form = $this->createFormBuilder($articless)
-            ->add('nom', TextType::class, [
-                'label' => 'Nom des articless',
-                'attr' => ['class' => 'form-control']
-            ])
-            ->add('prix', NumberType::class, [
-                'label' => 'Prix',
-                'attr' => ['class' => 'form-control'],
-                'html5' => true
-            ])
-            ->add('save', SubmitType::class, [
-                'label' => 'Créer',
-                'attr' => ['class' => 'btn btn-primary mt-3']
-            ])
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($articless);
-            $entityManager->flush();
-            
-            $this->addFlash('success', 'Articless créé avec succès!');
-            
-            return $this->redirectToRoute('articless_list');
-        }
-
-        return $this->render('articless/new.html.twig', [
-            'form' => $form->createView()
-        ]);
+   /**
+* @Route("/articless/new", name="new_article")
+* Method({"GET", "POST"})
+*/
+public function new(Request $request) {
+    $article = new Articles();
+    $form = $this->createForm(ArticleType::class,$article);
+    $form->handleRequest($request);
+    if($form->isSubmitted() && $form->isValid()) {
+    $article = $form->getData();
+    $entityManager = $this->getDoctrine()->getManager();
+    $entityManager->persist($article);
+    $entityManager->flush();
+    return $this->redirectToRoute('article_list');
+    }
+    return $this->render('articless/new.html.twig',['form' => $form->createView()]);
     }
 
     /**
@@ -106,41 +86,27 @@ public function show(int $id, EntityManagerInterface $entityManager): Response
     ]);
 }
 
-   /**
- * @Route("/articless/edit/{id}", name="edit_articless", methods={"GET", "POST"})
+/**
+ * @Route("/articless/edit/{id}", name="edit_article", methods={"GET", "POST"})
  */
-public function edit(Request $request, int $id, EntityManagerInterface $entityManager): Response
+public function edit(Request $request, $id, EntityManagerInterface $entityManager): Response
 {
-    $articless = $entityManager->getRepository(Articles::class)->find($id);
-    
-    if (!$articless) {
-        throw $this->createNotFoundException('Article non trouvé');
+    $article = $entityManager->getRepository(Articles::class)->find($id);
+
+    if (!$article) {
+        throw $this->createNotFoundException('Article non trouvé avec l\'ID ' . $id);
     }
 
-    $form = $this->createFormBuilder($articless)
-        ->add('nom', TextType::class, [
-            'attr' => ['class' => 'form-control']
-        ])
-        ->add('prix', NumberType::class, [
-            'attr' => ['class' => 'form-control'],
-            'html5' => true
-        ])
-        ->add('save', SubmitType::class, [
-            'label' => 'Modifier',
-            'attr' => ['class' => 'btn btn-primary mt-3']
-        ])
-        ->getForm();
-
+    $form = $this->createForm(ArticleType::class, $article);
     $form->handleRequest($request);
 
-    if($form->isSubmitted() && $form->isValid()) {
+    if ($form->isSubmitted() && $form->isValid()) {
         $entityManager->flush();
-        $this->addFlash('success', 'Article modifié avec succès!');
         return $this->redirectToRoute('articless_list');
     }
 
     return $this->render('articless/edit.html.twig', [
-        'form' => $form->createView()
+        'form' => $form->createView(),
     ]);
 }
 
